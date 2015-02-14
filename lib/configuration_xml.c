@@ -541,6 +541,13 @@ void parseCache(mapcache_context *ctx, ezxml_t node, mapcache_cfg *config)
     ctx->set_error(ctx,400, "failed to add cache \"%s\": memcache support is not available on this build",name);
     return;
 #endif
+  } else if(!strcmp(type,"redis")) {
+#ifdef USE_REDIS
+    cache = mapcache_cache_redis_create(ctx);
+#else
+    ctx->set_error(ctx, 400, "failed to add cache \"%s\": redis support is not available on this build", name);
+    return;
+#endif
   } else if(!strcmp(type,"tiff")) {
 #ifdef USE_TIFF
     cache = mapcache_cache_tiff_create(ctx);

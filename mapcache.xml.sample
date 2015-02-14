@@ -385,6 +385,14 @@
       </server>
    </cache>
    -->
+
+   <!-- redis cache
+        requires that hiredis library be installed
+   <cache name="redis" type="redis">
+       <host>redis.mysite.com</host>
+       <port>6379</port>
+   </cache>
+   -->
    
    <!-- sqlite cache
         requires building with "with-sqlite"

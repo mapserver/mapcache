@@ -6,6 +6,7 @@
 #cmakedefine USE_SQLITE 1
 #cmakedefine USE_BDB 1
 #cmakedefine USE_MEMCACHE 1
+#cmakedefine USE_REDIS 1
 #cmakedefine USE_TIFF 1
 #cmakedefine USE_TIFF_WRITE 1
 #cmakedefine USE_GEOTIFF 1

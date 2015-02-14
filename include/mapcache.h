@@ -66,6 +66,10 @@
 #include <apr_memcache.h>
 #endif
 
+#ifdef USE_REDIS
+#include <hiredis/hiredis.h>
+#endif
+
 #define MAPCACHE_SUCCESS 0
 #define MAPCACHE_FAILURE 1
 #define MAPCACHE_TRUE 1
@@ -377,6 +381,9 @@ typedef enum {
 #ifdef USE_TIFF
   ,MAPCACHE_CACHE_TIFF
 #endif
+#ifdef USE_REDIS
+  ,MAPCACHE_CACHE_REDIS
+#endif
 } mapcache_cache_type;
 
 /** \interface mapcache_cache
@@ -592,6 +599,24 @@ struct mapcache_cache_memcache {
  * \memberof mapcache_cache_memcache
  */
 mapcache_cache* mapcache_cache_memcache_create(mapcache_context *ctx);
+#endif
+
+#ifdef USE_REDIS
+typedef struct mapcache_cache_redis mapcache_cache_redis;
+/**\class mapcache_cache_redis
+ * \brief a mapcache_cache on redis server
+ * \implements mapcache_cache
+ */
+struct mapcache_cache_redis {
+  mapcache_cache cache;
+  char *host;
+  unsigned long int port;
+};
+
+/**
+ * \memberof mapcache_cache_redis
+ */
+mapcache_cache* mapcache_cache_redis_create(mapcache_context* ctx);
 #endif
 
 /** @} */
