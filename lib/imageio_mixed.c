@@ -62,8 +62,8 @@ mapcache_image_format* mapcache_imageio_create_mixed_format(apr_pool_t *pool,
   format->transparent = transparent;
   format->opaque = opaque;
   format->alpha_cutoff = alpha_cutoff;
-  format->format.extension = apr_pstrdup(pool,"xxx");
-  format->format.mime_type = NULL;
+  format->format.extension = apr_pstrdup(pool,"jpgpng");
+  format->format.mime_type = apr_pstrdup(pool,"image/jpgpng");
   format->format.write = _mapcache_imageio_mixed_encode;
   format->format.create_empty_image = transparent->create_empty_image;
   format->format.metadata = apr_table_make(pool,3);
