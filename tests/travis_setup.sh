@@ -52,6 +52,9 @@ echo '    <service type="wms" enabled="true"/>' >> $MAPCACHE_CONF
 echo '    <log_level>debug</log_level>' >> $MAPCACHE_CONF
 echo '</mapcache>' >> $MAPCACHE_CONF
 
+sudo chown -R www-data:www-data /tmp/mc/
+sudo chmod -R 777 /tmp/mc/
+
 cp data/world.tif /tmp/mc
 
 sudo su -c "echo 'LoadModule mapcache_module /usr/lib/apache2/modules/mod_mapcache.so' >> /etc/apache2/apache2.conf"

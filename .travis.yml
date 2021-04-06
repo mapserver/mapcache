@@ -1,33 +1,38 @@
+branches:
+  except:
+  - /^(cherry-pick-)?backport-\d+-to-/
+
 matrix:
   fast_finish: true
   include:
     - os: linux
-      dist: xenial
+      dist: focal
       language: c
       sudo: required
       env:
-        - DISTRO=xenial
+        - DISTRO=focal
         - BUILD_TYPE=maximum
 
     - os: linux
-      dist: xenial
+      dist: focal
       language: c
       sudo: required
       env:
-        - DISTRO=xenial
+        - DISTRO=focal
         - BUILD_TYPE=minimum
 
     - os: linux
+      dist: bionic
       language: c
       sudo: required
       env:
-        - DISTRO=precise
+        - DISTRO=bionic
         - BUILD_TYPE=maximum
 
 language: c
 
 before_install:
-  - sudo mv /etc/apt/sources.list.d/pgdg* /tmp
+  - if test "$DISTRO" = "bionic"; then sudo mv /etc/apt/sources.list.d/pgdg* /tmp; fi
   - sudo apt-get purge -y libgdal* libgeos* libspatialite*
   - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get update
@@ -42,15 +47,18 @@ script:
   - make -j3
   - sudo make install
 # Only test with Apache 2.4
-  - if test "$DISTRO" = "xenial" -a "$BUILD_TYPE" = "maximum"; then cd ../tests; sh ./travis_setup.sh; sh ./run_tests.sh; fi
+  - if [ "$BUILD_TYPE" = "maximum" ]; then 
+      cd ../tests; 
+      sh ./travis_setup.sh;
+      sh ./run_tests.sh;
+      sudo systemctl -l status apache2.service;
+      cat /tmp/mc/mapcache.xml;
+      ls -lah /tmp/mc/mapcache.xml;
+    fi
 
-
-#notifications:
-#  email:
-#    recipients:
-#      - thomas.bonfort@gmail.com
-#  irc:
-#    channels:
-#      - "irc.freenode.org#mapserver"
-#    use_notice: true
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#mapcache"
+    use_notice: true
 
