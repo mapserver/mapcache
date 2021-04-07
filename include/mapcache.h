@@ -817,6 +817,11 @@ struct mapcache_cfg {
   mapcache_service * services[MAPCACHE_SERVICES_COUNT];
 
   /**
+   * default service which will be used if no service type was specified in the url
+   */
+  mapcache_service *default_service;
+
+  /**
    * hashtable containing configured mapcache_source%s
    */
   apr_hash_t *sources;

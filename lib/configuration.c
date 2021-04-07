@@ -224,6 +224,8 @@ mapcache_cfg* mapcache_configuration_create(apr_pool_t *pool)
   cfg->loglevel = MAPCACHE_WARN;
   cfg->autoreload = 0;
 
+  cfg->default_service = NULL;
+
   return cfg;
 }
 

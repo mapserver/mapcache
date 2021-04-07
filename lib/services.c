@@ -38,9 +38,16 @@
 void mapcache_service_dispatch_request(mapcache_context *ctx, mapcache_request **request, char *pathinfo, apr_table_t *params, mapcache_cfg *config)
 {
   int i;
+  mapcache_service *service = NULL;
 
-  /* skip empty pathinfo */
-  if(!pathinfo) {
+  /* skip leading /'s */
+  while(pathinfo && (*pathinfo) == '/')
+    ++pathinfo;
+
+  /* set default url prefix or skip empty pathinfo */
+  if((!pathinfo || strlen(pathinfo) == 0) && config->default_service) {
+      pathinfo = apr_pstrdup(ctx->pool,config->default_service->url_prefix);
+  } else if(!pathinfo) {
     ctx->set_error(ctx,404,"missing a service");
     return;
   }
@@ -52,7 +59,6 @@ void mapcache_service_dispatch_request(mapcache_context *ctx, mapcache_request *
   for(i=0; i<MAPCACHE_SERVICES_COUNT; i++) {
     /* loop through the services that have been configured */
     int prefixlen;
-    mapcache_service *service = NULL;
     service = config->services[i];
     if(!service) continue; /* skip an unconfigured service */
     prefixlen = strlen(service->url_prefix);
@@ -67,6 +73,20 @@ void mapcache_service_dispatch_request(mapcache_context *ctx, mapcache_request *
     /* stop looping on services */
     return;
   }
+
+  if (config->default_service) {
+    /* no matching url prefix of any service:
+       assume request should go to the default service */
+    service = config->default_service;
+    ctx->service = service;
+    ctx->service->parse_request(ctx,service,request,pathinfo,params,config);
+
+    if(*request)
+      (*request)->service = service;
+
+    return;
+  }
+
   ctx->set_error(ctx,404,"unknown service %s",pathinfo);
 }
 

@@ -1300,60 +1300,50 @@ void mapcache_configuration_parse_xml(mapcache_context *ctx, const char *filenam
     for(service_node = node; service_node; service_node = service_node->next) {
       char *enabled = (char*)ezxml_attr(service_node,"enabled");
       char *type = (char*)ezxml_attr(service_node,"type");
-      if(!strcasecmp(enabled,"true")) {
-        if (!strcasecmp(type,"wms")) {
-          mapcache_service *new_service = mapcache_service_wms_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_WMS] = new_service;
-        } else if (!strcasecmp(type,"tms")) {
-          mapcache_service *new_service = mapcache_service_tms_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_TMS] = new_service;
-        } else if (!strcasecmp(type,"wmts")) {
-          mapcache_service *new_service = mapcache_service_wmts_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_WMTS] = new_service;
-        } else if (!strcasecmp(type,"kml")) {
-          mapcache_service *new_service = mapcache_service_kml_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_KML] = new_service;
-        } else if (!strcasecmp(type,"gmaps")) {
-          mapcache_service *new_service = mapcache_service_gmaps_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_GMAPS] = new_service;
-        } else if (!strcasecmp(type,"mapguide")) {
-          mapcache_service *new_service = mapcache_service_mapguide_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_MAPGUIDE] = new_service;
-        } else if (!strcasecmp(type,"ve")) {
-          mapcache_service *new_service = mapcache_service_ve_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_VE] = new_service;
-        } else if (!strcasecmp(type,"demo")) {
-          mapcache_service *new_service = mapcache_service_demo_create(ctx);
-          if(new_service->configuration_parse_xml) {
-            new_service->configuration_parse_xml(ctx,service_node,new_service,config);
-          }
-          config->services[MAPCACHE_SERVICE_DEMO] = new_service;
-        } else {
-          ctx->set_error(ctx,400,"unknown <service> type %s",type);
-        }
-        if(GC_HAS_ERROR(ctx)) goto cleanup;
+      char *default_service = (char*)ezxml_attr(service_node,"default");
+      int service_type;
+      mapcache_service *new_service;
+
+      if(strcasecmp(enabled,"true"))
+        continue;
+
+      if (!strcasecmp(type,"wms")) {
+        new_service = mapcache_service_wms_create(ctx);
+        service_type = MAPCACHE_SERVICE_WMS;
+      } else if (!strcasecmp(type,"tms")) {
+        new_service = mapcache_service_tms_create(ctx);
+        service_type = MAPCACHE_SERVICE_TMS;
+      } else if (!strcasecmp(type,"wmts")) {
+        new_service = mapcache_service_wmts_create(ctx);
+        service_type = MAPCACHE_SERVICE_WMTS;
+      } else if (!strcasecmp(type,"kml")) {
+        new_service = mapcache_service_kml_create(ctx);
+        service_type = MAPCACHE_SERVICE_KML;
+      } else if (!strcasecmp(type,"gmaps")) {
+        new_service = mapcache_service_gmaps_create(ctx);
+        service_type = MAPCACHE_SERVICE_GMAPS;
+      } else if (!strcasecmp(type,"mapguide")) {
+        new_service = mapcache_service_mapguide_create(ctx);
+        service_type = MAPCACHE_SERVICE_MAPGUIDE;
+      } else if (!strcasecmp(type,"ve")) {
+        new_service = mapcache_service_ve_create(ctx);
+        service_type = MAPCACHE_SERVICE_VE;
+      } else if (!strcasecmp(type,"demo")) {
+        new_service = mapcache_service_demo_create(ctx);
+        service_type = MAPCACHE_SERVICE_DEMO;
+      } else {
+        ctx->set_error(ctx,400,"unknown <service> type %s",type);
       }
+
+      if(GC_HAS_ERROR(ctx)) goto cleanup;
+
+      if(new_service->configuration_parse_xml)
+        new_service->configuration_parse_xml(ctx,service_node,new_service,config);
+
+      if(default_service && !strcasecmp(default_service,"true"))
+        config->default_service = new_service;
+
+      config->services[service_type] = new_service;
     }
   } else if ((node = ezxml_child(doc,"services")) != NULL) {
     ctx->log(ctx,MAPCACHE_WARN,"<services> tag is deprecated, use <service type=\"wms\" enabled=\"true|false\">");
